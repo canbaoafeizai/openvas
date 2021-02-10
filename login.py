@@ -52,8 +52,8 @@ class OpenVAS_API(object):
             ('login', self.username),
             ('password', self.password),
         ]
-        res = requests.post(self.base, data=data, proxies=self.proxies, cookies=self.cookie_jar, headers=self.headers,verify=False)
-        # res = requests.post(self.base, data=data, cookies=self.cookie_jar, headers=self.headers, verify=False)
+        #res = requests.post(self.base, data=data, proxies=self.proxies, cookies=self.cookie_jar, headers=self.headers,verify=False)
+        res = requests.post(self.base, data=data, cookies=self.cookie_jar, headers=self.headers, verify=False)
         if res.status_code == 200:
             self.cookie_jar = res.cookies
             parse = xml_parse.parse(res.content.decode('utf-8'))
@@ -69,8 +69,8 @@ class OpenVAS_API(object):
             ('usage_type', 'scan'),
             ('filter', "~" + self.task_name + " apply_overrides=0 min_qod=70 sort=name first=1 rows=10")
         ]
-        # res = requests.get(self.gmpurl, cookies=self.cookie_jar, params=data, headers=self.headers, verify=False)
-        res = requests.get(self.gmpurl, cookies=self.cookie_jar, proxies=self.proxies, params=data,headers=self.headers, verify=False)
+        res = requests.get(self.gmpurl, cookies=self.cookie_jar, params=data, headers=self.headers, verify=False)
+        #res = requests.get(self.gmpurl, cookies=self.cookie_jar, proxies=self.proxies, params=data,headers=self.headers, verify=False)
         if res.status_code == 200:
             parse = xml_parse.parse(res.content.decode('utf-8'))
             report_id_dict = parse.get_item_attr(".//report")
@@ -93,9 +93,8 @@ class OpenVAS_API(object):
             ('filter', 'apply_overrides=0 levels=hml rows=-1 min_qod=70 first=1 sort-reverse=severity notes=1 '
                        'overrides=1')
         ]
-        # res = requests.get(self.gmpurl, cookies=self.cookie_jar, params=data, headers=self.headers, verify=False)
-        res = requests.get(self.gmpurl, cookies=self.cookie_jar, proxies=self.proxies, params=data,
-                           headers=self.headers, verify=False)
+        res = requests.get(self.gmpurl, cookies=self.cookie_jar, params=data, headers=self.headers, verify=False)
+        #res = requests.get(self.gmpurl, cookies=self.cookie_jar, proxies=self.proxies, params=data,headers=self.headers, verify=False)
         # print(res.text)
         if res.status_code == 200:
             f = open(self.report_path, 'w', encoding='utf-8', newline='')
@@ -108,7 +107,8 @@ class OpenVAS_API(object):
 
 
 if __name__ == '__main__':
-    task_name = input("Input full report name,run as python3 openvas.py welink-2015-1")
+    task_name = sys.argv[1]
+    #task_name = input("Input full report name,run as python3 openvas.py welink-2015-1")
     # task_name = "127.0.0.1"
     csv_report = OpenVAS_API(task_name)
     json_report = parse_csv.parse(csv_report.csv_name)
