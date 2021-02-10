@@ -22,7 +22,7 @@ class parse(object):
         self.convert_csv_to_json()
 
     def convert_csv_to_json(self):
-        data = pd.read_csv(login.csv_path+self.csv_name)
+        data = pd.read_csv(os.path.join(login.csv_path,self.csv_name))
         json_line = {}
         column_num = data.shape[0]
         raw_num = data.shape[1]
@@ -31,7 +31,7 @@ class parse(object):
                 for i in range(column_num):
                     for j in range(raw_num):
                         json_line[self.csv_column_list[j]] = data.loc[i][j]
-                    f.write(json.dumps(json_line, indent=4, cls=NpEncoder))
+                    f.write(json.dumps(json_line, cls=NpEncoder)+"\n")
             print("conver success,name={}".format(self.json_file_path))
             f.close()
         except:

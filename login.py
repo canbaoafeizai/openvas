@@ -12,8 +12,8 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 os_path = os.path.dirname(__file__)
-csv_path = os.path.join(os_path + "./report/csv/")
-json_path = os.path.join(os_path + "./report/json/")
+csv_path = os.path.join(os_path,"report","csv")
+json_path = os.path.join(os_path , "report","json")
 
 
 class OpenVAS_API(object):
