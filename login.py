@@ -5,6 +5,7 @@ import requests
 from requests.cookies import RequestsCookieJar
 import xml_parse
 import time
+import parse_csv
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 class OpenVAS_API(object):
@@ -30,13 +31,16 @@ class OpenVAS_API(object):
         self.cookie_jar = RequestsCookieJar()
         self.proxies = {'http' : "http://127.0.0.1:8090",
                    'https' : "https://127.0.0.1:8090"}
+        self.login()
+        self.get_report_id()
+        self.get_report_csv()
     def login(self):
         data = [
             ('cmd', 'login'),
             ('login', self.username),
             ('password', self.password),
         ]
-        res = requests.post(self.base, data=data, proxies=self.proxies , cookies = self.cookie_jar , headers = self.headers  ,verify=False)
+        res = requests.post(self.base, data=data , cookies = self.cookie_jar , headers = self.headers  ,verify=False)
         if res.status_code == 200:
             self.cookie_jar = res.cookies
             parse = xml_parse.parse(res.content.decode('utf-8'))
@@ -51,7 +55,7 @@ class OpenVAS_API(object):
             ('usage_type', 'scan'),
             ('filter', "~"+self.report_name+" apply_overrides=0 min_qod=70 sort=name first=1 rows=10")
         ]
-        res = requests.get(self.gmpurl, cookies = self.cookie_jar ,proxies=self.proxies , params=data, headers = self.headers  ,verify=False)
+        res = requests.get(self.gmpurl, cookies = self.cookie_jar , params=data, headers = self.headers  ,verify=False)
         if res.status_code == 200:
             parse = xml_parse.parse(res.content.decode('utf-8'))
             report_id_dict = parse.get_item_attr(".//report")
@@ -73,11 +77,11 @@ class OpenVAS_API(object):
             ('filter', 'apply_overrides=0 levels=hml rows=-1 min_qod=70 first=1 sort-reverse=severity notes=1 '
                        'overrides=1')
         ]
-        res = requests.get(self.gmpurl, cookies = self.cookie_jar , proxies=self.proxies ,params=data, headers = self.headers  ,verify=False)
+        res = requests.get(self.gmpurl, cookies = self.cookie_jar ,params=data, headers = self.headers  ,verify=False)
         # print(res.text)
         if res.status_code == 200:
             date = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
-            file_name = self.report_name+"-"+date+".csv"
+            file_name = "./report/csv/"+self.report_name+"-"+date+".csv"
             f = open(file_name, 'w', encoding='utf-8', newline='')
             f.write(res.text)
             f.close()
@@ -85,13 +89,13 @@ class OpenVAS_API(object):
         else:
             print(res.text)
             raise Exception('[FAIL] Could not parse tasksname')
+
 if __name__ == '__main__':
     print("Input full report name,run as python3 openvas.py welink-2015-1")
-    # report_name = sys.argv[0]
-    report_name = "cm_test"
-    api = OpenVAS_API(report_name)
-    api.login()
-    api.get_report_id()
-    api.get_report_csv()
+    report_name = sys.argv[0]
+    # report_name = "cm_test-2021-02-09-23-05-07"
+    csv_report = OpenVAS_API(report_name)
+    json_report = parse_csv.parse(report_name)
+
 
 
